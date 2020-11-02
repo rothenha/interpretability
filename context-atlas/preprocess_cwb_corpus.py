@@ -194,8 +194,9 @@ def get_vocab(strCorpus: str, nMaxVocabSize: int, nMinFrequency: int, strPositio
         typer.secho(f"filtering out: {strWord}", fg=typer.colors.MAGENTA)
         continue
       
-      lstWords += strWord
+      lstWords.append(strWord)
 
+    typer.secho(f"vocabulary size: {len(lstLexLines)}", fg=typer.colors.BLUE)
     print(lstWords[:100])
 
     return lstWords
