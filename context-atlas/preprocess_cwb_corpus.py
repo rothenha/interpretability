@@ -181,10 +181,10 @@ def get_vocab(strCorpus: str, nMaxVocabSize: int, nMinFrequency: int, strPositio
       lstLexLines.append(strLine.decode().strip().split("\t"))
 
     lstLexLines.sort(key=lambda entry:int(entry[0]), reverse=True)
-    print(f"len(lstLexLines) = {len(lstLexLines)}")
-    print(lstLexLines[:100])
+    typer.secho(f"vocabulary size: {len(lstLexLines)}", fg=typer.colors.BLUE)
 
     lstWords = [lstWordInfo[1] for lstWordInfo in lstLexLines]
+    print(lstWords[:100])
 
     return lstWords
 
