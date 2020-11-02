@@ -100,6 +100,7 @@ class VRTSentenceProvider:
                             if len(lstTokens) <= self.nMaxSentenceLength:
                                 lstSentenceData.append(SentenceData(lstTokens, lstPOSs))
                     else:
+                        typer.secho(f"strLine: {strLine}", fg=typer.colors.MAGENTA)
                         strWord, strPOS = strLine.split("\n")
                         lstTokens.append(strWord)
                         lstPOSs.append(strPOS)

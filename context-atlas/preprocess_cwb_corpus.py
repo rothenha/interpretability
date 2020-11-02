@@ -192,7 +192,7 @@ def get_vocab(strCorpus: str, nMaxVocabSize: int, nMinFrequency: int, strPositio
         break
 
       if len(strWord) < 2 or re.match(r"^\W+$", strWord):
-        typer.secho(f"filtering out: {strWord}", fg=typer.colors.MAGENTA)
+        # typer.secho(f"filtering out: {strWord}", fg=typer.colors.MAGENTA)
         continue
       
       lstWords.append(strWord)
