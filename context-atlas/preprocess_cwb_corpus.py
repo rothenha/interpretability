@@ -184,7 +184,9 @@ def get_vocab(strCorpus: str, nMaxVocabSize: int, nMinFrequency: int, strPositio
     print(f"len(lstLexLines) = {len(lstLexLines)}")
     print(lstLexLines[:100])
 
-    return lstLexLines
+    lstWords = [lstWordInfo[1] for lstWordInfo in lstLexLines]
+
+    return lstWords
 
 def main(
   str_corpus: str = typer.Argument(..., help="CWB corpus name", metavar="CORPUS"),
