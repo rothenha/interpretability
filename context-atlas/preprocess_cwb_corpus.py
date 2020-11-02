@@ -174,7 +174,7 @@ def get_vocab(strCorpus: str, nMaxVocabSize: int, nMinFrequency: int, strPositio
   with subprocess.Popen(["cwb-lexdecode", "-f", "b", "-P", strPositionalAttritbute, strCorpus], stdout=PIPE) as procLexDecode:
     strOutput = procLexDecode.communicate()[0]
 
-    lstLexLines = strOutput.split("\n")
+    lstLexLines = strOutput.encode().split("\n")
 
     print(f"len(lstLexLines) = {len(lstLexLines)}")
 
