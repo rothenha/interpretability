@@ -35,6 +35,7 @@ from tqdm import tqdm
 import nltk
 import typer
 import subprocess
+import utils.cwb_helper
 
 
 DB_PATH = './enwiki-20170820.db'
@@ -196,8 +197,7 @@ def get_vocab(strCorpus: str, nMaxVocabSize: int, nMinFrequency: int, strPositio
       
       lstWords.append(strWord)
 
-    typer.secho(f"vocabulary size: {len(lstLexLines)}", fg=typer.colors.BLUE)
-    print(lstWords[:100])
+    typer.secho(f"vocabulary size: {len(lstWords)}", fg=typer.colors.BLUE)
 
     return lstWords
 
@@ -214,8 +214,6 @@ def main(
   device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
   print("device : ", device)
 
-  lstWords = get_vocab(str_corpus, nMaxVocabSize, nMinFrequency, strPositionalAttribute)
-
   # Load pre-trained model tokenizer (vocabulary)
   tokenizer = BertTokenizer.from_pretrained('bert-base-german-cased')
   # Load pre-trained model (weights)
@@ -223,35 +221,36 @@ def main(
   model.eval()
   model = model.to(device)
 
-  # Get selection of sentences from wikipedia.
-  with open('static/words.json') as f:
-    words = json.load(f)
+  # Get selection of sentences from corpus.
+  lstWords = get_vocab(str_corpus, nMaxVocabSize, nMinFrequency, strPositionalAttribute)
 
-  sentences = get_sentences()
+  vrtSentenceProvider = utils.cwb_helper.VRTSentenceProvider(str_corpus, strPositionalAttribute, "s", 150, lstWords)
 
-  for word in tqdm(words):
-    # Filter out sentences that don't have the word.
-    sentences_w_word = [t for t in sentences if ' ' + word + ' ' in t]
+  # sentences = get_sentences()
 
-    # Take at most 200 sentences.
-    sentences_w_word = sentences_w_word[:1000]
+  # for word in tqdm(lstWords):
+  #   # Filter out sentences that don't have the word.
+  #   sentences_w_word = [t for t in sentences if ' ' + word + ' ' in t]
 
-    # And don't show anything if there are less than 100 sentences.
-    if (len(sentences_w_word) > 100):
-      print('starting process for word : %s'%word)
-      locs_and_data = neighbors(word, sentences_w_word)
-      with open('static/jsons/%s.json'%word, 'w') as outfile:
-        json.dump(locs_and_data, outfile)
+  #   # Take at most 200 sentences.
+  #   sentences_w_word = sentences_w_word[:1000]
 
-  # Store an updated json with the filtered words.
-  filtered_words = []
-  for word in os.listdir('static/jsons'):
-    word = word.split('.')[0]
-    filtered_words.append(word)
+  #   # And don't show anything if there are less than 100 sentences.
+  #   if (len(sentences_w_word) > 100):
+  #     print('starting process for word : %s'%word)
+  #     locs_and_data = neighbors(word, sentences_w_word)
+  #     with open('static/jsons/%s.json'%word, 'w') as outfile:
+  #       json.dump(locs_and_data, outfile)
 
-  with open('static/filtered_words.json', 'w') as outfile:
-    json.dump(filtered_words, outfile)
-  # print(filtered_words)
+  # # Store an updated json with the filtered words.
+  # filtered_words = []
+  # for word in os.listdir('static/jsons'):
+  #   word = word.split('.')[0]
+  #   filtered_words.append(word)
+
+  # with open('static/filtered_words.json', 'w') as outfile:
+  #   json.dump(filtered_words, outfile)
+  # # print(filtered_words)
 
 if __name__ == '__main__':
   typer.run(main)
