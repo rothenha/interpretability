@@ -180,7 +180,7 @@ def get_vocab(strCorpus: str, nMaxVocabSize: int, nMinFrequency: int, strPositio
         break
       lstLexLines.append(strLine.decode().split("\t"))
 
-    lstLexLines.sort(key=lambda entry:entry[0])
+    lstLexLines.sort(key=lambda entry:entry[0], reverse=True)
     print(f"len(lstLexLines) = {len(lstLexLines)}")
     print(lstLexLines[:100])
 
