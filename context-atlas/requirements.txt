@@ -1,4 +1,8 @@
-torch==1.2.0
-pytorch-pretrained-bert==0.6.2
-nltk>=3.4.5
-umap-learn==0.3.10
+torch
+pytorch-transformers
+nltk
+umap-learn
+typer
+click
+colorama
+shellingham
