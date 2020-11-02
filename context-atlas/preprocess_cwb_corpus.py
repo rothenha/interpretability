@@ -183,7 +183,19 @@ def get_vocab(strCorpus: str, nMaxVocabSize: int, nMinFrequency: int, strPositio
     lstLexLines.sort(key=lambda entry:int(entry[0]), reverse=True)
     typer.secho(f"vocabulary size: {len(lstLexLines)}", fg=typer.colors.BLUE)
 
-    lstWords = [lstWordInfo[1] for lstWordInfo in lstLexLines]
+    lstWords = []
+    for lstWordInfo in lstLexLines:
+      strWord = lstWordInfo[1]
+      nFrequency = int(lstWordInfo[0])
+      if len(lstWords) >= nMaxVocabSize or nFrequency < nMinFrequency:
+        break
+
+      if len(strWord) < 2 or re.match(r"^\W+$", strWord):
+        typer.secho(f"filtering out: {strWord}", fg=typer.colors.MAGENTA)
+        continue
+      
+      lstWords += strWord
+
     print(lstWords[:100])
 
     return lstWords
@@ -203,41 +215,41 @@ def main(
 
   lstWords = get_vocab(str_corpus, nMaxVocabSize, nMinFrequency, strPositionalAttribute)
 
-  # # Load pre-trained model tokenizer (vocabulary)
-  # tokenizer = BertTokenizer.from_pretrained('bert-base-german-cased')
-  # # Load pre-trained model (weights)
-  # model = BertModel.from_pretrained('bert-base-german-cased')
-  # model.eval()
-  # model = model.to(device)
+  # Load pre-trained model tokenizer (vocabulary)
+  tokenizer = BertTokenizer.from_pretrained('bert-base-german-cased')
+  # Load pre-trained model (weights)
+  model = BertModel.from_pretrained('bert-base-german-cased')
+  model.eval()
+  model = model.to(device)
 
-  # # Get selection of sentences from wikipedia.
-  # with open('static/words.json') as f:
-  #   words = json.load(f)
+  # Get selection of sentences from wikipedia.
+  with open('static/words.json') as f:
+    words = json.load(f)
 
-  # sentences = get_sentences()
+  sentences = get_sentences()
 
-  # for word in tqdm(words):
-  #   # Filter out sentences that don't have the word.
-  #   sentences_w_word = [t for t in sentences if ' ' + word + ' ' in t]
+  for word in tqdm(words):
+    # Filter out sentences that don't have the word.
+    sentences_w_word = [t for t in sentences if ' ' + word + ' ' in t]
 
-  #   # Take at most 200 sentences.
-  #   sentences_w_word = sentences_w_word[:1000]
+    # Take at most 200 sentences.
+    sentences_w_word = sentences_w_word[:1000]
 
-  #   # And don't show anything if there are less than 100 sentences.
-  #   if (len(sentences_w_word) > 100):
-  #     print('starting process for word : %s'%word)
-  #     locs_and_data = neighbors(word, sentences_w_word)
-  #     with open('static/jsons/%s.json'%word, 'w') as outfile:
-  #       json.dump(locs_and_data, outfile)
+    # And don't show anything if there are less than 100 sentences.
+    if (len(sentences_w_word) > 100):
+      print('starting process for word : %s'%word)
+      locs_and_data = neighbors(word, sentences_w_word)
+      with open('static/jsons/%s.json'%word, 'w') as outfile:
+        json.dump(locs_and_data, outfile)
 
-  # # Store an updated json with the filtered words.
-  # filtered_words = []
-  # for word in os.listdir('static/jsons'):
-  #   word = word.split('.')[0]
-  #   filtered_words.append(word)
+  # Store an updated json with the filtered words.
+  filtered_words = []
+  for word in os.listdir('static/jsons'):
+    word = word.split('.')[0]
+    filtered_words.append(word)
 
-  # with open('static/filtered_words.json', 'w') as outfile:
-  #   json.dump(filtered_words, outfile)
+  with open('static/filtered_words.json', 'w') as outfile:
+    json.dump(filtered_words, outfile)
   # print(filtered_words)
 
 if __name__ == '__main__':
