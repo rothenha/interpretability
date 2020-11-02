@@ -181,7 +181,7 @@ def get_vocab(strCorpus: str, nMaxVocabSize: int, nMinFrequency: int, strPositio
     return lstLexLines
 
 def main(
-  strCorpus: str = typer.Argument(..., help="CWB corpus name", metavar="CORPUS"),
+  str_corpus: str = typer.Argument(..., help="CWB corpus name", metavar="CORPUS"),
   nMaxVocabSize: int = typer.Option(100000, "--max_vocab_size", "-m", help="maximum number of words for which to compute sense clusterings"),
   nMinFrequency: int = typer.Option(40, "--min_word_frequency", "-f", help="minimum number of occurrences of words for which to compute sense clusterings"),
   strPositionalAttribute: str = typer.Option("word", "--positional_attribute", "-P", help="the positional attribute (word, lemma) to use")
@@ -193,7 +193,7 @@ def main(
   device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
   print("device : ", device)
 
-  lstWords = get_vocab(strCorpus, nMaxVocabSize, nMinFrequency, strPositionalAttribute)
+  lstWords = get_vocab(str_corpus, nMaxVocabSize, nMinFrequency, strPositionalAttribute)
 
   # # Load pre-trained model tokenizer (vocabulary)
   # tokenizer = BertTokenizer.from_pretrained('bert-base-german-cased')
