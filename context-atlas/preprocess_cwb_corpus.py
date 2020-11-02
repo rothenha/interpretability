@@ -171,10 +171,14 @@ def get_poses(word, sentences):
   return sent_data
 
 def get_vocab(strCorpus: str, nMaxVocabSize: int, nMinFrequency: int, strPositionalAttritbute: str) -> List[str]:
-  with subprocess.Popen(["cwb-lexdecode", "-f", "b", "-P", strPositionalAttritbute, strCorpus], stdout=PIPE) as procLexDecode:
-    strOutput = procLexDecode.communicate()[0]
+  with subprocess.Popen(["cwb-lexdecode", "-f", "-b", "-P", strPositionalAttritbute, strCorpus], stdout=PIPE) as procLexDecode:
 
-    lstLexLines = strOutput.decode().split("\n")
+    lstLexLines = []
+    while True:
+      strLine = procLexDecode.stdout.readline()
+      if not strLine:
+        break
+      lstLexLines.append(strLine)
 
     print(f"len(lstLexLines) = {len(lstLexLines)}")
 
