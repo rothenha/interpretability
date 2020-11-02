@@ -178,7 +178,7 @@ def get_vocab(strCorpus: str, nMaxVocabSize: int, nMinFrequency: int, strPositio
       strLine = procLexDecode.stdout.readline()
       if not strLine:
         break
-      lstLexLines.append(strLine.decode().split("\t"))
+      lstLexLines.append(strLine.decode().strip().split("\t"))
 
     lstLexLines.sort(key=lambda entry:entry[0], reverse=True)
     print(f"len(lstLexLines) = {len(lstLexLines)}")
