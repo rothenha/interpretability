@@ -103,6 +103,9 @@ def get_embeddings(word, sentences, tokenizer, model: PreTrainedModel, device):
         typer.secho(
             f"encoded_layers tensor size: {len(encoded_layers[0])}", fg=typer.colors.MAGENTA
         )
+        typer.secho(
+            f"encoded_layers tensor vector size: {len(encoded_layers[0][0])}", fg=typer.colors.MAGENTA
+        )
         
 
         # We have a hidden states for each of the 12 layers in model bert-base-uncased
