@@ -183,7 +183,7 @@ def main(
     """
 
     strDevice = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    typer.secho(f"device: {strDevice}", typer.colors.BLUE)
+    typer.secho(f"device: {strDevice}", fg=typer.colors.BLUE)
 
     # Load pre-trained model tokenizer (vocabulary)
     tokenizer = BertTokenizer.from_pretrained("bert-base-german-cased")
