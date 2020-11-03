@@ -182,22 +182,22 @@ def main(
     Compute sentence sense clusterings for words in CWB CORPUS.
     """
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    print("device : ", device)
+    strDevice = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    typer.secho(f"device: {strDevice}", typer.colors.BLUE)
 
     # Load pre-trained model tokenizer (vocabulary)
     tokenizer = BertTokenizer.from_pretrained("bert-base-german-cased")
     # Load pre-trained model (weights)
     model = BertModel.from_pretrained("bert-base-german-cased")
     model.eval()
-    model = model.to(device)
+    model = model.to(strDevice)
 
     # Get selection of sentences from corpus.
     lstWords = get_vocab(
         str_corpus, nMaxVocabSize, nMinFrequency, strPositionalAttribute
     )
     with open("static/words.json") as f_vocab:
-        json.dump(lstWords)
+        json.dump(lstWords, f_vocab)
 
     vrtSentenceProvider = utils.cwb_helper.VRTSentenceProvider(
         str_corpus, strPositionalAttribute, "s", 40, lstWords
@@ -212,7 +212,7 @@ def main(
         if len(lstSentenceData) > 20:
             typer.secho(f"starting process for word : {strWord}", fg=typer.colors.BLUE)
             locs_and_data = neighbors(
-                strWord, lstSentenceData, tokenizer, model, device
+                strWord, lstSentenceData, tokenizer, model, strDevice
             )
             with open(f"static/jsons/{strWord}.json", "w") as f_word:
                 json.dump(locs_and_data, f_word)
