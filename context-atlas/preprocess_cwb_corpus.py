@@ -23,6 +23,7 @@ from sys import stdout
 from typing import List
 
 import os
+from pytorch_transformers.modeling_utils import PreTrainedModel
 import torch
 from pytorch_transformers import BertTokenizer, BertModel, BertForMaskedLM
 import sqlite3 as sql
@@ -31,15 +32,9 @@ import numpy as np
 import umap
 import json
 from tqdm import tqdm
-import nltk
 import typer
 import subprocess
 import utils.cwb_helper
-
-
-DB_PATH = "./enwiki-20170820.db"
-nltk.download("averaged_perceptron_tagger")
-nltk.download("punkt")
 
 
 def neighbors(word, lstSentenceData, tokenizer, model, device):
@@ -64,7 +59,7 @@ def project_umap(points):
     return points_transformed
 
 
-def get_embeddings(word, sentences, tokenizer, model, device):
+def get_embeddings(word, sentences, tokenizer, model: PreTrainedModel, device):
     """Get the embedding for a word in each sentence."""
     # Tokenized input
     layers = range(-12, 0)
@@ -103,7 +98,7 @@ def get_embeddings(word, sentences, tokenizer, model, device):
             f"encoded_layers size: {len(encoded_layers)}", fg=typer.colors.MAGENTA
         )
         typer.secho(
-            f"encoded_layers: {encoded_layers}", fg=typer.colors.MAGENTA
+            f"encoded_layers tensor size: {len(encoded_layers[0])}", fg=typer.colors.MAGENTA
         )
         
 
