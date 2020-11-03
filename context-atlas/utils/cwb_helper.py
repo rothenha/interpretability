@@ -31,7 +31,7 @@ class VRTSentenceProvider:
         typer.secho(f"shuffling corpus sentences", fg=typer.colors.BLUE)
         np.random.shuffle(self.lstSentenceData)
         self.mapWordSentenceIndices = self.indexSentences(set(lstVocab), self.lstSentenceData)
-
+        typer.secho(f"index: {self.mapWordSentenceIndices}", fg=typer.colors.MAGENTA)
     def indexSentences(self, setVocab, lstSentenceData: List[SentenceData]):
         typer.secho(f"indexing corpus for the defined vocabulary", fg=typer.colors.BLUE)
         mapWordSentenceIndices = {}
