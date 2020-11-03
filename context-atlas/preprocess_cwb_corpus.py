@@ -196,7 +196,7 @@ def main(
     lstWords = get_vocab(
         str_corpus, nMaxVocabSize, nMinFrequency, strPositionalAttribute
     )
-    with open("static/words.json") as f_vocab:
+    with open("static/words.json", "w") as f_vocab:
         json.dump(lstWords, f_vocab)
 
     vrtSentenceProvider = utils.cwb_helper.VRTSentenceProvider(
