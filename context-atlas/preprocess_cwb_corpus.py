@@ -112,6 +112,7 @@ def get_embeddings(word, sentences, tokenizer, model, device):
 
         # Reconfigure to have an array of layer: embeddings
         for l in layers:
+            typer.secho(f"word_idx = {word_idx}", fg=typer.colors.MAGENTA)
             sentence_embedding = encoded_layers[l][0][word_idx]
             points[l].append(sentence_embedding)
 
