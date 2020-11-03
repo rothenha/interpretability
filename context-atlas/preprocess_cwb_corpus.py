@@ -1,4 +1,3 @@
-
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,219 +37,195 @@ import subprocess
 import utils.cwb_helper
 
 
-DB_PATH = './enwiki-20170820.db'
-nltk.download('averaged_perceptron_tagger')
-nltk.download('punkt')
+DB_PATH = "./enwiki-20170820.db"
+nltk.download("averaged_perceptron_tagger")
+nltk.download("punkt")
 
 
-def neighbors(word, sentences):
-  """Get the info and (umap-projected) embeddings about a word."""
-  # Get part of speech of this word.
-  sent_data = get_poses(word, sentences)
+def neighbors(word, lstSentenceData, tokenizer, model, device):
+    """Get the info and (umap-projected) embeddings about a word."""
 
-  # Get embeddings.
-  points = get_embeddings(word.lower(), sentences)
+    lstSentences = [sentenceData["sentence"] for sentenceData in lstSentenceData]
+    # Get embeddings.
+    points = get_embeddings(word, lstSentences, tokenizer, model, device)
 
-  # Use UMAP to project down to 3 dimnsions.
-  points_transformed = project_umap(points)
+    # Use UMAP to project down to 3 dimnsions.
+    points_transformed = project_umap(points)
 
-  return {'labels': sent_data, 'data': points_transformed}
+    return {"labels": lstSentenceData, "data": points_transformed}
+
 
 def project_umap(points):
-  """Project the words (by layer) into 3 dimensions using umap."""
-  points_transformed = []
-  for layer in points:
-    transformed = umap.UMAP().fit_transform(layer).tolist()
-    points_transformed.append(transformed)
-  return points_transformed
-
-def get_embeddings(word, sentences):
-  """Get the embedding for a word in each sentence."""
-  # Tokenized input
-  layers = range(-12, 0)
-  points = [[] for layer in layers]
-  print('Getting embeddings for %d sentences '%len(sentences))
-  for sentence in sentences:
-    sentence = '[CLS] ' + sentence + ' [SEP]'
-    tokenized_text = tokenizer.tokenize(sentence)
-
-    # Convert token to vocabulary indices
-    indexed_tokens = tokenizer.convert_tokens_to_ids(tokenized_text)
-
-    # Define sentence A and B indices associated to 1st and 2nd sentences (see paper)
-    # should give you something like [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1]
-    sep_idxs = [-1] + [i for i, v in enumerate(tokenized_text) if v == '[SEP]']
-    segments_ids = []
-    for i in range(len(sep_idxs) - 1):
-      segments_ids += [i] * (sep_idxs[i+1] - sep_idxs[i])
-
-    # Convert inputs to PyTorch tensors
-    tokens_tensor = torch.tensor([indexed_tokens])
-    segments_tensors = torch.tensor([segments_ids])
-
-    tokens_tensor = tokens_tensor.to(device)
-    segments_tensors = segments_tensors.to(device)
-
-    # Predict hidden states features for each layer
-    with torch.no_grad():
-      encoded_layers, _ = model(tokens_tensor, segments_tensors)
-      encoded_layers = [l.cpu() for l in encoded_layers]
-
-    # We have a hidden states for each of the 12 layers in model bert-base-uncased
-    encoded_layers = [l.numpy() for l in encoded_layers]
-    try:
-      word_idx = tokenized_text.index(word)
-    # If the word is made up of multiple tokens, just use the first one of the tokens that make it up.
-    except:
-      for i, token in enumerate(tokenized_text):
-        if token == word[:len(token)]:
-          word_idx = i
-
-    # Reconfigure to have an array of layer: embeddings
-    for l in layers:
-      sentence_embedding = encoded_layers[l][0][word_idx]
-      points[l].append(sentence_embedding)
-
-  points = np.asarray(points)
-  return points
-
-def tokenize_sentences(text):
-  """Simple tokenizer."""
-  print('starting tokenization')
-
-  text = re.sub('\n', ' ', text)
-  sentences = re.split('(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', text)
-
-  # Filter out too long sentences.
-  sentences = [t for t in sentences if len(t) < 150]
-
-  return sentences
+    """Project the words (by layer) into 3 dimensions using umap."""
+    points_transformed = []
+    for layer in points:
+        transformed = umap.UMAP().fit_transform(layer).tolist()
+        points_transformed.append(transformed)
+    return points_transformed
 
 
-def get_query(select, db=DB_PATH):
-  """Executes a select statement and returns results and column/field names."""
-  with sql.connect(db) as conn:
-    c = conn.cursor()
-    c.execute(select)
-    col_names = [str(name[0]).lower() for name in c.description]
-  return c.fetchall(), col_names
+def get_embeddings(word, sentences, tokenizer, model, device):
+    """Get the embedding for a word in each sentence."""
+    # Tokenized input
+    layers = range(-12, 0)
+    points = [[] for layer in layers]
+    typer.secho(
+        f"Getting embeddings for {len(sentences)} sentences", fg=typer.colors.MAGENTA
+    )
+
+    for sentence in sentences:
+        sentence = "[CLS] " + sentence + " [SEP]"
+        tokenized_text = tokenizer.tokenize(sentence)
+
+        # Convert token to vocabulary indices
+        indexed_tokens = tokenizer.convert_tokens_to_ids(tokenized_text)
+
+        # Define sentence A and B indices associated to 1st and 2nd sentences (see paper)
+        # should give you something like [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1]
+        sep_idxs = [-1] + [i for i, v in enumerate(tokenized_text) if v == "[SEP]"]
+        segments_ids = []
+        for i in range(len(sep_idxs) - 1):
+            segments_ids += [i] * (sep_idxs[i + 1] - sep_idxs[i])
+
+        # Convert inputs to PyTorch tensors
+        tokens_tensor = torch.tensor([indexed_tokens])
+        segments_tensors = torch.tensor([segments_ids])
+
+        tokens_tensor = tokens_tensor.to(device)
+        segments_tensors = segments_tensors.to(device)
+
+        # Predict hidden states features for each layer
+        with torch.no_grad():
+            encoded_layers, _ = model(tokens_tensor, segments_tensors)
+            encoded_layers = [l.cpu() for l in encoded_layers]
+
+        # We have a hidden states for each of the 12 layers in model bert-base-uncased
+        encoded_layers = [l.numpy() for l in encoded_layers]
+        word_idx = -1
+        try:
+            word_idx = tokenized_text.index(word)
+        # If the word is made up of multiple tokens, just use the first one of the tokens that make it up.
+        except:
+            for i, token in enumerate(tokenized_text):
+                if token == word[: len(token)]:
+                    word_idx = i
+
+        # Reconfigure to have an array of layer: embeddings
+        for l in layers:
+            sentence_embedding = encoded_layers[l][0][word_idx]
+            points[l].append(sentence_embedding)
+
+    points = np.asarray(points)
+    return points
 
 
-def get_sentences():
-  """Returns a bunch of sentences from wikipedia"""
-  print('Selecting sentences from wikipedia...')
+def get_vocab(
+    strCorpus: str, nMaxVocabSize: int, nMinFrequency: int, strPositionalAttritbute: str
+) -> List[str]:
+    with subprocess.Popen(
+        ["cwb-lexdecode", "-f", "-b", "-P", strPositionalAttritbute, strCorpus],
+        stdout=PIPE,
+    ) as procLexDecode:
 
-  select = 'select * from articles limit 5000000'
-  docs, _ = get_query(select)
-  docs = [doc[3] for doc in docs]
-  doc = ' '.join(docs)
-  print('Number of articles selected: %d'%len(docs))
+        lstLexLines = []
+        while True:
+            strLine = procLexDecode.stdout.readline()
+            if not strLine:
+                break
+            lstLexLines.append(strLine.decode().strip().split("\t"))
 
-  sentences = tokenize_sentences(doc)
-  print('Total number of sentences: %d'%len(sentences))
-  np.random.shuffle(sentences)
-  return sentences
+        lstLexLines.sort(key=lambda entry: int(entry[0]), reverse=True)
+        typer.secho(
+            f"overall vocabulary size: {len(lstLexLines)}", fg=typer.colors.BLUE
+        )
 
+        lstWords = []
+        for lstWordInfo in lstLexLines:
+            strWord = lstWordInfo[1]
+            nFrequency = int(lstWordInfo[0])
+            if len(lstWords) >= nMaxVocabSize or nFrequency < nMinFrequency:
+                break
 
+            if len(strWord) < 2 or re.match(r"^\W+$", strWord):
+                # typer.secho(f"filtering out: {strWord}", fg=typer.colors.MAGENTA)
+                continue
 
-def get_poses(word, sentences):
-  """Get the part of speech tag for the given word in a list of sentences."""
-  sent_data = []
-  for sent in sentences:
-    text = nltk.word_tokenize(sent)
-    pos = nltk.pos_tag(text)
-    try:
-      word_idx = text.index(word)
-      pos_tag = pos[word_idx][1]
-    except:
-      pos_tag = 'X'
-    sent_data.append({
-      'sentence': sent,
-      'pos': pos_tag
-    })
+            lstWords.append(strWord)
 
-  return sent_data
+        typer.secho(f"selected vocabulary size: {len(lstWords)}", fg=typer.colors.BLUE)
 
-def get_vocab(strCorpus: str, nMaxVocabSize: int, nMinFrequency: int, strPositionalAttritbute: str) -> List[str]:
-  with subprocess.Popen(["cwb-lexdecode", "-f", "-b", "-P", strPositionalAttritbute, strCorpus], stdout=PIPE) as procLexDecode:
+        return lstWords
 
-    lstLexLines = []
-    while True:
-      strLine = procLexDecode.stdout.readline()
-      if not strLine:
-        break
-      lstLexLines.append(strLine.decode().strip().split("\t"))
-
-    lstLexLines.sort(key=lambda entry:int(entry[0]), reverse=True)
-    typer.secho(f"overall vocabulary size: {len(lstLexLines)}", fg=typer.colors.BLUE)
-
-    lstWords = []
-    for lstWordInfo in lstLexLines:
-      strWord = lstWordInfo[1]
-      nFrequency = int(lstWordInfo[0])
-      if len(lstWords) >= nMaxVocabSize or nFrequency < nMinFrequency:
-        break
-
-      if len(strWord) < 2 or re.match(r"^\W+$", strWord):
-        # typer.secho(f"filtering out: {strWord}", fg=typer.colors.MAGENTA)
-        continue
-      
-      lstWords.append(strWord)
-
-    typer.secho(f"selected vocabulary size: {len(lstWords)}", fg=typer.colors.BLUE)
-
-    return lstWords
 
 def main(
-  str_corpus: str = typer.Argument(..., help="CWB corpus name", metavar="CORPUS"),
-  nMaxVocabSize: int = typer.Option(100000, "--max_vocab_size", "-m", help="maximum number of words for which to compute sense clusterings"),
-  nMinFrequency: int = typer.Option(40, "--min_word_frequency", "-f", help="minimum number of occurrences of words for which to compute sense clusterings"),
-  strPositionalAttribute: str = typer.Option("word", "--positional_attribute", "-P", help="the positional attribute (word, lemma) to use")
-  ):
-  """
-  Compute sentence sense clusterings for words in CWB CORPUS.
-  """
+    str_corpus: str = typer.Argument(..., help="CWB corpus name", metavar="CORPUS"),
+    nMaxVocabSize: int = typer.Option(
+        100000,
+        "--max_vocab_size",
+        "-m",
+        help="maximum number of words for which to compute sense clusterings",
+    ),
+    nMinFrequency: int = typer.Option(
+        40,
+        "--min_word_frequency",
+        "-f",
+        help="minimum number of occurrences of words for which to compute sense clusterings",
+    ),
+    strPositionalAttribute: str = typer.Option(
+        "word",
+        "--positional_attribute",
+        "-P",
+        help="the positional attribute (word, lemma) to use",
+    ),
+):
+    """
+    Compute sentence sense clusterings for words in CWB CORPUS.
+    """
 
-  device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-  print("device : ", device)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print("device : ", device)
 
-  # Load pre-trained model tokenizer (vocabulary)
-  tokenizer = BertTokenizer.from_pretrained('bert-base-german-cased')
-  # Load pre-trained model (weights)
-  model = BertModel.from_pretrained('bert-base-german-cased')
-  model.eval()
-  model = model.to(device)
+    # Load pre-trained model tokenizer (vocabulary)
+    tokenizer = BertTokenizer.from_pretrained("bert-base-german-cased")
+    # Load pre-trained model (weights)
+    model = BertModel.from_pretrained("bert-base-german-cased")
+    model.eval()
+    model = model.to(device)
 
-  # Get selection of sentences from corpus.
-  lstWords = get_vocab(str_corpus, nMaxVocabSize, nMinFrequency, strPositionalAttribute)
+    # Get selection of sentences from corpus.
+    lstWords = get_vocab(
+        str_corpus, nMaxVocabSize, nMinFrequency, strPositionalAttribute
+    )
+    with open("static/words.json") as f_vocab:
+        json.dump(lstWords)
 
-  vrtSentenceProvider = utils.cwb_helper.VRTSentenceProvider(str_corpus, strPositionalAttribute, "s", 150, lstWords)
+    vrtSentenceProvider = utils.cwb_helper.VRTSentenceProvider(
+        str_corpus, strPositionalAttribute, "s", 40, lstWords
+    )
 
-  # sentences = get_sentences()
+    for strWord in tqdm(lstWords):
+        lstSentenceData = vrtSentenceProvider.getSentenceDataForWord(
+            strWord, nMaxCount=1000
+        )
 
-  # for word in tqdm(lstWords):
-  #   # Filter out sentences that don't have the word.
-  #   sentences_w_word = [t for t in sentences if ' ' + word + ' ' in t]
+        # And don't show anything if there are less than 20 sentences.
+        if len(lstSentenceData) > 20:
+            typer.secho(f"starting process for word : {strWord}", fg=typer.colors.BLUE)
+            locs_and_data = neighbors(
+                strWord, lstSentenceData, tokenizer, model, device
+            )
+            with open(f"static/jsons/{strWord}.json", "w") as f_word:
+                json.dump(locs_and_data, f_word)
 
-  #   # Take at most 200 sentences.
-  #   sentences_w_word = sentences_w_word[:1000]
+    # Store an updated json with the filtered words.
+    filtered_words = []
+    for strWord in os.listdir("static/jsons"):
+        strWord = strWord.split(".")[0]
+        filtered_words.append(strWord)
 
-  #   # And don't show anything if there are less than 100 sentences.
-  #   if (len(sentences_w_word) > 100):
-  #     print('starting process for word : %s'%word)
-  #     locs_and_data = neighbors(word, sentences_w_word)
-  #     with open('static/jsons/%s.json'%word, 'w') as outfile:
-  #       json.dump(locs_and_data, outfile)
+    with open("static/filtered_words.json", "w") as f_filtered_words:
+        json.dump(filtered_words, f_filtered_words)
 
-  # # Store an updated json with the filtered words.
-  # filtered_words = []
-  # for word in os.listdir('static/jsons'):
-  #   word = word.split('.')[0]
-  #   filtered_words.append(word)
 
-  # with open('static/filtered_words.json', 'w') as outfile:
-  #   json.dump(filtered_words, outfile)
-  # # print(filtered_words)
-
-if __name__ == '__main__':
-  typer.run(main)
+if __name__ == "__main__":
+    typer.run(main)

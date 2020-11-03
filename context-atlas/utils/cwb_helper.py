@@ -31,7 +31,8 @@ class VRTSentenceProvider:
         typer.secho(f"shuffling corpus sentences", fg=typer.colors.BLUE)
         np.random.shuffle(self.lstSentenceData)
         self.mapWordSentenceIndices = self.indexSentences(set(lstVocab), self.lstSentenceData)
-        typer.secho(f"index: {self.mapWordSentenceIndices}", fg=typer.colors.MAGENTA)
+        # typer.secho(f"index: {self.mapWordSentenceIndices}", fg=typer.colors.MAGENTA)
+
     def indexSentences(self, setVocab, lstSentenceData: List[SentenceData]):
         typer.secho(f"indexing corpus for the defined vocabulary", fg=typer.colors.BLUE)
         mapWordSentenceIndices = {}
@@ -48,7 +49,7 @@ class VRTSentenceProvider:
 
         return mapWordSentenceIndices
     
-    def getSentenceDataForWord(self, strWord):
+    def getSentenceDataForWord(self, strWord: str, nMaxCount: int = -1):
         if strWord not in self.mapWordSentenceIndices:
             return None
         
@@ -56,8 +57,12 @@ class VRTSentenceProvider:
 
         lstSentencesWithPOS = []
         for nSentenceIndex, strPOS in lstSentenceIndexAndPOS:
-            lstSentencesWithPOS.append( (self.lstSentenceData[nSentenceIndex].lstWords, strPOS) )
-        
+            lstSentencesWithPOS.append( {
+                "sentence": " ".join(self.lstSentenceData[nSentenceIndex].lstWords),
+                "pos": strPOS} )
+            if nMaxCount > 0 and len(lstSentencesWithPOS) == nMaxCount:
+                break
+
         return lstSentencesWithPOS
 
     def isTagLine(self, strLine):
