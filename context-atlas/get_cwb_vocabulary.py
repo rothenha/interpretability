@@ -74,7 +74,7 @@ def main(
     lstWords = get_vocab(
         str_corpus, nMaxVocabSize, nMinFrequency, strPositionalAttribute
     )
-    print(json.dumps(lstWords))
+    print(json.dumps(lstWords, indent=4))
     # with open("static/words.json", "w") as f_vocab:
     #     json.dump(lstWords, f_vocab)
 
