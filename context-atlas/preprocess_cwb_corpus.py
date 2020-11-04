@@ -92,9 +92,16 @@ def get_embeddings(word, sentences, tokenizer, model: PreTrainedModel, device):
 
         # Predict hidden states features for each layer
         with torch.no_grad():
-            encoded_layers, _ = model(tokens_tensor, token_type_ids=segments_tensors)
+            outputs = model(tokens_tensor, token_type_ids=segments_tensors)
+            encoded_layers = outputs[0]
             typer.secho(
                 f"encoded_layers size: {encoded_layers.shape}", fg=typer.colors.MAGENTA
+            )        
+            typer.secho(
+                f"outputs size: {len(outputs)}", fg=typer.colors.MAGENTA
+            )        
+            typer.secho(
+                f"outputs: {outputs}", fg=typer.colors.MAGENTA
             )        
             encoded_layers = [l.cpu() for l in encoded_layers]
         
