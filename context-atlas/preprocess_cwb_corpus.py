@@ -148,6 +148,7 @@ def get_vocab(
         )
 
         lstWords = []
+        lstLexLines = lstLexLines[100:]
         for lstWordInfo in lstLexLines:
             strWord = lstWordInfo[1]
             nFrequency = int(lstWordInfo[0])

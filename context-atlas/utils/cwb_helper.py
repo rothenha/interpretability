@@ -74,7 +74,7 @@ class VRTSentenceProvider:
         strSentenceStartPattern = r'^<{}( .*)?>$'.format(self.strSentenceTag)
         strSentenceEndPattern = r'^</{}>$'.format(self.strSentenceTag)
 
-        strCommand = f"cwb-decode -Cx -s 0 -e 1000000 {self.strCorpus} -P {self.strPositionalAttribute} -P pos -S {self.strSentenceTag}"
+        strCommand = f"cwb-decode -Cx {self.strCorpus} -P {self.strPositionalAttribute} -P pos -S {self.strSentenceTag}"
         typer.secho(f"decoding corpus with the following command:\n{strCommand}", fg=typer.colors.BLUE)
         with subprocess.Popen(strCommand.split(), stdout=PIPE) as procCWBDecode:
             isInSentence = False
