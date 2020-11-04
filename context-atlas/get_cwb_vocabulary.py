@@ -74,8 +74,9 @@ def main(
     lstWords = get_vocab(
         str_corpus, nMaxVocabSize, nMinFrequency, strPositionalAttribute
     )
-    with open("static/words.json", "w") as f_vocab:
-        json.dump(lstWords, f_vocab)
+    print(json.dumps(lstWords))
+    # with open("static/words.json", "w") as f_vocab:
+    #     json.dump(lstWords, f_vocab)
 
 if __name__ == "__main__":
     typer.run(main)
