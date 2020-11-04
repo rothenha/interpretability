@@ -195,9 +195,9 @@ def main(
 
     # Load pre-trained model tokenizer (vocabulary)
     config = BertConfig.from_pretrained("bert-base-german-cased", output_hidden_states=True)
-    tokenizer = BertTokenizer.from_pretrained("bert-base-german-cased", config=config)
+    tokenizer = BertTokenizer.from_pretrained("bert-base-german-cased")
     # Load pre-trained model (weights)
-    model = BertModel.from_pretrained("bert-base-german-cased")
+    model = BertModel.from_pretrained("bert-base-german-cased", config=config)
     model.eval()
     model = model.to(strDevice)
 
