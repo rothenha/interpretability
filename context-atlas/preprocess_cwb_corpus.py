@@ -23,6 +23,7 @@ from sys import stdout
 from typing import List
 
 import os
+from pytorch_transformers.modeling_bert import BertConfig
 from pytorch_transformers.modeling_utils import PreTrainedModel
 import torch
 from pytorch_transformers import BertTokenizer, BertModel, BertForMaskedLM
@@ -186,7 +187,8 @@ def main(
     typer.secho(f"device: {strDevice}", fg=typer.colors.BLUE)
 
     # Load pre-trained model tokenizer (vocabulary)
-    tokenizer = BertTokenizer.from_pretrained("bert-base-german-cased")
+    config = BertConfig.from_pretrained("bert-base-german-cased", output_hidden_states=True)
+    tokenizer = BertTokenizer.from_pretrained("bert-base-german-cased", config=config)
     # Load pre-trained model (weights)
     model = BertModel.from_pretrained("bert-base-german-cased")
     model.eval()
