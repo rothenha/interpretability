@@ -22,7 +22,7 @@ def get_vocab(
 
         lstLexLines.sort(key=lambda entry: int(entry[0]), reverse=True)
         typer.secho(
-            f"overall vocabulary size: {len(lstLexLines)}", fg=typer.colors.BLUE
+            f"overall vocabulary size: {len(lstLexLines)}", fg=typer.colors.BLUE, err=True
         )
 
         lstWords = []
@@ -39,7 +39,7 @@ def get_vocab(
 
             lstWords.append(strWord)
 
-        typer.secho(f"selected vocabulary size: {len(lstWords)}", fg=typer.colors.BLUE)
+        typer.secho(f"selected vocabulary size: {len(lstWords)}", fg=typer.colors.BLUE, err=True)
 
         return lstWords
 
