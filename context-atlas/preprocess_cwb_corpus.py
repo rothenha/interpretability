@@ -26,7 +26,7 @@ import os
 from pytorch_transformers.modeling_bert import BertConfig
 from pytorch_transformers.modeling_utils import PreTrainedModel
 import torch
-from pytorch_transformers import BertTokenizer, BertModel, BertForMaskedLM
+from pytorch_transformers import BertTokenizer, BertModel, TFB, BertForMaskedLM
 import sqlite3 as sql
 import re
 import numpy as np
@@ -98,10 +98,10 @@ def get_embeddings(word, sentences, tokenizer, model: PreTrainedModel, device):
                 f"encoded_layers size: {encoded_layers.shape}", fg=typer.colors.MAGENTA
             )        
             typer.secho(
-                f"outputs size: {len(outputs)}", fg=typer.colors.MAGENTA
+                f"outputs[2] size: {len(outputs[2])}", fg=typer.colors.MAGENTA
             )        
             typer.secho(
-                f"outputs: {outputs}", fg=typer.colors.MAGENTA
+                f"outputs[2]: {outputs[2]}", fg=typer.colors.MAGENTA
             )        
             encoded_layers = [l.cpu() for l in encoded_layers]
         
