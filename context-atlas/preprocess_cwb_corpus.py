@@ -26,7 +26,7 @@ import os
 from pytorch_transformers.modeling_bert import BertConfig
 from pytorch_transformers.modeling_utils import PreTrainedModel
 import torch
-from pytorch_transformers import BertTokenizer, BertModel, TFB, BertForMaskedLM
+from pytorch_transformers import BertTokenizer, BertModel, BertForMaskedLM
 import sqlite3 as sql
 import re
 import numpy as np
