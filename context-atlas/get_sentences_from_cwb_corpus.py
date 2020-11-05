@@ -3,7 +3,7 @@ import numpy as np
 import json
 import typer
 import tqdm
-from typing import List
+from typing import List, Optional
 
 class SentenceData(object):
 
@@ -104,7 +104,7 @@ class VRTSentenceProvider:
         return lstSentenceData
 
 def main(
-    f_corpus: typer.FileText = typer.Argument(help="decoded and CWB corpus file", metavar="DECODED_CORPUS"),
+    f_corpus: Optional[typer.FileText] = typer.Argument(None, help="decoded and CWB corpus file", metavar="DECODED_CORPUS"),
     f_vocab: typer.FileText = typer.Option(..., help="file in json format with list if words for which to extract sentences", metavar="JSON_FILE")
 ):
     """
