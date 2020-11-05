@@ -105,7 +105,7 @@ class VRTSentenceProvider:
 
 def main(
     f_corpus: Optional[typer.FileText] = typer.Argument(None, help="decoded and CWB corpus file", metavar="DECODED_CORPUS"),
-    f_vocab: typer.FileText = typer.Option(..., help="file in json format with list if words for which to extract sentences", metavar="JSON_FILE")
+    f_vocab: typer.FileText = typer.Option(..., "--lexicon", "-l", help="file in json format with list if words for which to extract sentences", metavar="JSON_FILE")
 ):
     """
     Get sentence data from CWB CORPUS.
