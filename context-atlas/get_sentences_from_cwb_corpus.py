@@ -72,39 +72,38 @@ class VRTSentenceProvider:
         strSentenceStartPattern = r'^<{}( .*)?>$'.format(self.strSentenceTag)
         strSentenceEndPattern = r'^</{}>$'.format(self.strSentenceTag)
 
-        with open(self.f_corpus) as f_corpus:
-            isInSentence = False
-            lstTokens = []
-            lstPOSs = []
-            for strLine in f_corpus:
+        isInSentence = False
+        lstTokens = []
+        lstPOSs = []
+        for strLine in self.f_corpus:
+            # ignore everything outside sentence tags
+            if not isInSentence:
+                matchSentenceStartTag = re.match(strSentenceStartPattern, strLine)
+                if matchSentenceStartTag:
+                    lstTokens = []
+                    lstPOSs = []
+                    isInSentence = True
                 # ignore everything outside sentence tags
-                if not isInSentence:
-                    matchSentenceStartTag = re.match(strSentenceStartPattern, strLine)
-                    if matchSentenceStartTag:
-                        lstTokens = []
-                        lstPOSs = []
-                        isInSentence = True
-                    # ignore everything outside sentence tags
-                    else:
-                        continue
                 else:
-                    strLine = strLine.strip()
-                    if self.isTagLine(strLine):
-                        if re.match(strSentenceEndPattern, strLine):
-                            isInSentence = False
+                    continue
+            else:
+                strLine = strLine.strip()
+                if self.isTagLine(strLine):
+                    if re.match(strSentenceEndPattern, strLine):
+                        isInSentence = False
 
-                            if len(lstTokens) <= self.nMaxSentenceLength:
-                                lstSentenceData.append(SentenceData(lstTokens, lstPOSs))
-                    else:
-                        # typer.secho(f"strLine: {strLine}", fg=typer.colors.MAGENTA)
-                        strWord, strPOS = strLine.split("\t")
-                        lstTokens.append(strWord)
-                        lstPOSs.append(strPOS)
+                        if len(lstTokens) <= self.nMaxSentenceLength:
+                            lstSentenceData.append(SentenceData(lstTokens, lstPOSs))
+                else:
+                    # typer.secho(f"strLine: {strLine}", fg=typer.colors.MAGENTA)
+                    strWord, strPOS = strLine.split("\t")
+                    lstTokens.append(strWord)
+                    lstPOSs.append(strPOS)
 
         return lstSentenceData
 
 def main(
-    f_corpus: Optional[typer.FileText] = typer.Argument(None, help="decoded and CWB corpus file", metavar="DECODED_CORPUS"),
+    f_corpus: Optional[typer.FileText] = typer.Argument(None, help="decoded CWB corpus file, read from STDIN if none", metavar="DECODED_CORPUS"),
     f_vocab: typer.FileText = typer.Option(..., "--lexicon", "-l", help="file in json format with list if words for which to extract sentences", metavar="JSON_FILE")
 ):
     """
