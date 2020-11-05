@@ -26,13 +26,13 @@ class VRTSentenceProvider:
         self.strSentenceTag = strSentenceTag
         self.nMaxSentenceLength = nMaxSentenceLength
         self.lstSentenceData = self.process_corpus()
-        print(f"shuffling corpus sentences")
+        typer.secho(f"shuffling corpus sentences", fg=typer.colors.MAGENTA, err=True)
         np.random.shuffle(self.lstSentenceData)
         self.mapWordSentenceIndices = self.indexSentences(set(lstVocab), self.lstSentenceData)
         # typer.secho(f"index: {self.mapWordSentenceIndices}", fg=typer.colors.MAGENTA)
 
     def indexSentences(self, setVocab, lstSentenceData: List[SentenceData]):
-        print(f"indexing corpus for the defined vocabulary")
+        typer.secho(f"indexing corpus for the defined vocabulary", fg=typer.colors.MAGENTA, err=True)
         mapWordSentenceIndices = {}
         for nSentenceIndex, sentenceData in enumerate(lstSentenceData):
             setWordsSeenInSentence = set()
