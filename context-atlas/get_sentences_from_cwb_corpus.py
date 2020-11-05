@@ -116,7 +116,7 @@ def main(
     lstWords = json.load(f_vocab)
     
     vrtSentenceProvider = VRTSentenceProvider(f_corpus, "s", 40, lstWords)
-    
+    typer.secho("corpus processing complete", fg=typer.colors.MAGENTA, err=True)
     nLast = len(lstWords)-1
     print("[")
     for i in enumerate(tqdm(lstWords)):
