@@ -55,7 +55,7 @@ def project_umap(points):
     """Project the words (by layer) into 3 dimensions using umap."""
     points_transformed = []
     for layer in points:
-        transformed = umap.UMAP(n_neighbours = 15).fit_transform(layer).tolist()
+        transformed = umap.UMAP().fit_transform(layer).tolist()
         points_transformed.append(transformed)
     return points_transformed
 
