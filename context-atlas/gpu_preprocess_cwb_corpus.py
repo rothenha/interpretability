@@ -205,7 +205,7 @@ def main(
     lstWords = get_vocab(
         str_corpus, nMaxVocabSize, nMinFrequency, strPositionalAttribute
     )
-    with open("gpu_static/words.json", "w") as f_vocab:
+    with open("static/words.json", "w") as f_vocab:
         json.dump(lstWords, f_vocab)
 
     vrtSentenceProvider = utils.cwb_helper.VRTSentenceProvider(
@@ -223,16 +223,16 @@ def main(
             locs_and_data = neighbors(
                 strWord, lstSentenceData, tokenizer, model, strDevice
             )
-            with open(f"gpu_static/jsons/{strWord}.json", "w") as f_word:
+            with open(f"static/jsons/{strWord}.json", "w") as f_word:
                 json.dump(locs_and_data, f_word)
 
     # Store an updated json with the filtered words.
     filtered_words = []
-    for strWord in os.listdir("gpu_static/jsons"):
+    for strWord in os.listdir("static/jsons"):
         strWord = strWord.split(".")[0]
         filtered_words.append(strWord)
 
-    with open("gpu_static/filtered_words.json", "w") as f_filtered_words:
+    with open("static/filtered_words.json", "w") as f_filtered_words:
         json.dump(filtered_words, f_filtered_words)
 
 
