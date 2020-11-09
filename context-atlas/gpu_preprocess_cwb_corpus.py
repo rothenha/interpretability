@@ -20,7 +20,7 @@ from __future__ import division
 from __future__ import print_function
 from subprocess import PIPE
 from sys import stdout
-from typing import List
+from typing import List, Optional
 
 import os
 from pytorch_transformers.modeling_bert import BertConfig
@@ -29,15 +29,112 @@ import torch
 from pytorch_transformers import BertTokenizer, BertModel, BertForMaskedLM
 import re
 import numpy as np
+
 # import umap
 import json
 from tqdm import tqdm
 import typer
 import subprocess
 import cuml.manifold.umap as umap
-import utils.cwb_helper
 
 MIN_SENTENCES = 20
+
+class SentenceData(object):
+
+    def __init__(self, lstWords, lstPOSs):
+        self.lstWords = lstWords
+        self.lstPOSs = lstPOSs
+
+    def getPOSForFirstOccurrenceOfWord(self, strWord):
+        nIndexWord = self.lstWords.index(strWord)
+        if nIndexWord >= 0:
+            return self.lstPOSs[nIndexWord]
+        else:
+            return nIndexWord
+
+class VRTSentenceProvider:
+    id_map = {}
+
+    def __init__(self, f_Corpus, strSentenceTag, nMaxSentenceLength, lstVocab):
+        self.f_corpus = f_Corpus
+        self.strSentenceTag = strSentenceTag
+        self.nMaxSentenceLength = nMaxSentenceLength
+        self.lstSentenceData = self.process_corpus()
+        typer.secho(f"shuffling corpus sentences", fg=typer.colors.MAGENTA, err=True)
+        np.random.shuffle(self.lstSentenceData)
+        self.mapWordSentenceIndices = self.indexSentences(set(lstVocab), self.lstSentenceData)
+        # typer.secho(f"index: {self.mapWordSentenceIndices}", fg=typer.colors.MAGENTA)
+
+    def indexSentences(self, setVocab, lstSentenceData: List[SentenceData]):
+        typer.secho(f"indexing corpus for the defined vocabulary", fg=typer.colors.MAGENTA, err=True)
+        mapWordSentenceIndices = {}
+        for nSentenceIndex, sentenceData in enumerate(lstSentenceData):
+            setWordsSeenInSentence = set()
+            for nWordIndex, strWord in enumerate(sentenceData.lstWords):
+                if strWord in setVocab:
+                    if strWord not in mapWordSentenceIndices:
+                        mapWordSentenceIndices[strWord] = [ (nSentenceIndex, sentenceData.lstPOSs[nWordIndex]) ]
+                    else:
+                        # only add first occurrence of a word
+                        if strWord not in setWordsSeenInSentence:
+                            mapWordSentenceIndices[strWord].append( (nSentenceIndex, sentenceData.lstPOSs[nWordIndex]) )
+
+        return mapWordSentenceIndices
+    
+    def getSentenceDataForWord(self, strWord: str, nMaxCount: int = -1):
+        if strWord not in self.mapWordSentenceIndices:
+            return None
+        
+        lstSentenceIndexAndPOS = self.mapWordSentenceIndices[strWord]
+
+        lstSentencesWithPOS = []
+        for nSentenceIndex, strPOS in lstSentenceIndexAndPOS:
+            lstSentencesWithPOS.append( {
+                "sentence": " ".join(self.lstSentenceData[nSentenceIndex].lstWords),
+                "pos": strPOS} )
+            if nMaxCount > 0 and len(lstSentencesWithPOS) == nMaxCount:
+                break
+
+        return lstSentencesWithPOS
+
+    def isTagLine(self, strLine):
+        return re.match(r'^</?(\S+).*>$', strLine)				
+   
+    def process_corpus(self):
+        self.id_map = {}
+        lstSentenceData = []
+        strSentenceStartPattern = r'^<{}( .*)?>$'.format(self.strSentenceTag)
+        strSentenceEndPattern = r'^</{}>$'.format(self.strSentenceTag)
+
+        isInSentence = False
+        lstTokens = []
+        lstPOSs = []
+        for strLine in self.f_corpus:
+            # ignore everything outside sentence tags
+            if not isInSentence:
+                matchSentenceStartTag = re.match(strSentenceStartPattern, strLine)
+                if matchSentenceStartTag:
+                    lstTokens = []
+                    lstPOSs = []
+                    isInSentence = True
+                # ignore everything outside sentence tags
+                else:
+                    continue
+            else:
+                strLine = strLine.strip()
+                if self.isTagLine(strLine):
+                    if re.match(strSentenceEndPattern, strLine):
+                        isInSentence = False
+
+                        if len(lstTokens) <= self.nMaxSentenceLength:
+                            lstSentenceData.append(SentenceData(lstTokens, lstPOSs))
+                else:
+                    # typer.secho(f"strLine: {strLine}", fg=typer.colors.MAGENTA)
+                    strWord, strPOS = strLine.split("\t")
+                    lstTokens.append(strWord)
+                    lstPOSs.append(strPOS)
+
+        return lstSentenceData
 
 def neighbors(word, lstSentenceData, tokenizer, model, device):
     """Get the info and (umap-projected) embeddings about a word."""
@@ -97,15 +194,14 @@ def get_embeddings(word, sentences, tokenizer, model: PreTrainedModel, device):
             encoded_layers = outputs[2]
             # typer.secho(
             #     f"encoded_layers size: {encoded_layers.shape}", fg=typer.colors.MAGENTA
-            # )        
+            # )
             # typer.secho(
             #     f"outputs[2] size: {len(outputs[2])}", fg=typer.colors.MAGENTA
-            # )        
+            # )
             # typer.secho(
             #     f"outputs[2]: {outputs[2]}", fg=typer.colors.MAGENTA
-            # )        
+            # )
             encoded_layers = [l.cpu() for l in encoded_layers]
-        
 
         # We have a hidden states for each of the 12 layers in model bert-base-uncased
         encoded_layers = [l.numpy() for l in encoded_layers]
@@ -128,7 +224,7 @@ def get_embeddings(word, sentences, tokenizer, model: PreTrainedModel, device):
     return points
 
 
-def get_vocab(
+def get_vocab_from_cwb(
     strCorpus: str, nMaxVocabSize: int, nMinFrequency: int, strPositionalAttritbute: str
 ) -> List[str]:
     with subprocess.Popen(
@@ -167,13 +263,25 @@ def get_vocab(
 
 
 def main(
-    str_corpus: str = typer.Argument(..., help="CWB corpus name", metavar="CORPUS"),
-    nMaxVocabSize: int = typer.Option(
-        100000,
-        "--max_vocab_size",
-        "-m",
-        help="maximum number of words for which to compute sense clusterings",
+    
+    f_corpus: Optional[typer.FileText] = typer.Argument(
+        None,
+        help="decoded CWB corpus file (read from stdin if not given)",
+        metavar="DECODED_CORPUS",
     ),
+    f_vocab: typer.FileText = typer.Option(
+        ...,
+        "--lexicon",
+        "-l",
+        help="file in json format with list of words for which to extract sentences",
+        metavar="JSON_FILE",
+    ),
+    # nMaxVocabSize: int = typer.Option(
+    #     100000,
+    #     "--max_vocab_size",
+    #     "-m",
+    #     help="maximum number of words for which to compute sense clusterings",
+    # ),
     nMinFrequency: int = typer.Option(
         40,
         "--min_word_frequency",
@@ -188,30 +296,31 @@ def main(
     ),
 ):
     """
-    Compute sentence sense clusterings for words in CWB CORPUS.
+    Compute sentence sense clusterings for words in CWB CORPUS read from decoded file or stdin.
     """
 
     strDevice = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     typer.secho(f"device: {strDevice}", fg=typer.colors.BLUE)
 
     # Load pre-trained model tokenizer (vocabulary)
-    config = BertConfig.from_pretrained("bert-base-german-cased", output_hidden_states=True)
+    config = BertConfig.from_pretrained(
+        "bert-base-german-cased", output_hidden_states=True
+    )
     tokenizer = BertTokenizer.from_pretrained("bert-base-german-cased")
     # Load pre-trained model (weights)
     model = BertModel.from_pretrained("bert-base-german-cased", config=config)
     model.eval()
     model = model.to(strDevice)
 
-    # Get selection of sentences from corpus.
-    lstWords = get_vocab(
-        str_corpus, nMaxVocabSize, nMinFrequency, strPositionalAttribute
-    )
-    with open("static/words.json", "w") as f_vocab:
-        json.dump(lstWords, f_vocab)
+    if f_corpus == None:
+        f_corpus = open("/dev/stdin")
 
-    vrtSentenceProvider = utils.cwb_helper.VRTSentenceProvider(
-        str_corpus, strPositionalAttribute, "s", 40, lstWords
-    )
+    lstWords = json.load(f_vocab)
+
+    with open("static/words.json", "w") as f_words:
+        json.dump(lstWords, f_words)
+
+    vrtSentenceProvider = VRTSentenceProvider(f_corpus, "s", 40, lstWords)
 
     for strWord in tqdm(lstWords):
         lstSentenceData = vrtSentenceProvider.getSentenceDataForWord(
@@ -229,7 +338,10 @@ def main(
             with open(f"static/jsons/{strWord}.json", "w") as f_word:
                 json.dump(locs_and_data, f_word)
         else:
-            typer.secho(f"too few sentences ({len(lstSentenceData)} < {MIN_SENTENCES}) for word : {strWord}", fg=typer.colors.BLUE)
+            typer.secho(
+                f"too few sentences ({len(lstSentenceData)} < {MIN_SENTENCES}) for word : {strWord}",
+                fg=typer.colors.BLUE,
+            )
 
     # Store an updated json with the filtered words.
     filtered_words = []
