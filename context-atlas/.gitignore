@@ -11,8 +11,6 @@ variables
 # keep folder for scripts, but not most contents
 static/*.*
 static/jsons/*.json
-!static/filtered_words.json
-!static/words.json
 
 
 # too big for source
