@@ -37,6 +37,7 @@ import subprocess
 import cuml.manifold.umap as umap
 import utils.cwb_helper
 
+MIN_SENTENCES = 20
 
 def neighbors(word, lstSentenceData, tokenizer, model, device):
     """Get the info and (umap-projected) embeddings about a word."""
@@ -218,13 +219,17 @@ def main(
         )
 
         # And don't show anything if there are less than 20 sentences.
-        if len(lstSentenceData) > 20:
+        if lstSentenceData == None:
+            typer.secho(f"no sentences for word : {strWord}", fg=typer.colors.BLUE)
+        elif len(lstSentenceData) > MIN_SENTENCES:
             typer.secho(f"starting process for word : {strWord}", fg=typer.colors.BLUE)
             locs_and_data = neighbors(
                 strWord, lstSentenceData, tokenizer, model, strDevice
             )
             with open(f"static/jsons/{strWord}.json", "w") as f_word:
                 json.dump(locs_and_data, f_word)
+        else:
+            typer.secho(f"too few sentences ({len(lstSentenceData)} < {MIN_SENTENCES}) for word : {strWord}", fg=typer.colors.BLUE)
 
     # Store an updated json with the filtered words.
     filtered_words = []
