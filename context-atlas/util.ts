@@ -130,6 +130,7 @@ export function dist(pt0: number[], pt1: number[]) {
 export async function loadJson(url: string, errorMesage: string) {
   // TODO(ereif): load these directly from cns/x20 rather than locally.
   const headers = new Headers({mode: 'cors', credentials: 'include'});
+  console.log(d3.json(url));
   const res = await d3.json(url, {method: 'GET', headers}).catch((err) => {
     alert(errorMesage);
   });
