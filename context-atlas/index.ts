@@ -156,7 +156,7 @@ export class BertVis {
   /**
    * Loads the words that are used in the dropdown.
    */
-  private async loadWords() {
+  private loadWords() {
     const url = 'filtered_words.json';
     const errorMessage = 'Could not load word dictionary.';
     const words = await util.loadJson(url, errorMessage) as string[];
