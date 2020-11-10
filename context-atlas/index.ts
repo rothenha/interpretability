@@ -92,7 +92,7 @@ export class BertVis {
   constructor() {}
   async start() {
     this.addHandlers();
-    await this.loadWords();
+    this.loadWords();
     const urlWord = util.getURLWord();
     this.getData(urlWord ? urlWord : 'lie');
     util.polyfillCheckIntersection();
