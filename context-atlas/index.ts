@@ -92,7 +92,7 @@ export class BertVis {
   constructor() {}
   async start() {
     this.addHandlers();
-    this.loadWords();
+    await this.loadWords();
     const urlWord = util.getURLWord();
     this.getData(urlWord ? urlWord : 'lie');
     util.polyfillCheckIntersection();
@@ -156,7 +156,7 @@ export class BertVis {
   /**
    * Loads the words that are used in the dropdown.
    */
-  private loadWords() {
+  private async loadWords() {
     const url = 'filtered_words.json';
     const errorMessage = 'Could not load word dictionary.';
     const words = await util.loadJson(url, errorMessage) as string[];
