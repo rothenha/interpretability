@@ -94,7 +94,7 @@ export class BertVis {
     this.addHandlers();
     await this.loadWords();
     const urlWord = util.getURLWord();
-    this.getData(urlWord ? urlWord : 'lie');
+    this.getData(urlWord ? urlWord : 'sagen');
     util.polyfillCheckIntersection();
   }
 
