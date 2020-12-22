@@ -35,7 +35,7 @@ import json
 from tqdm import tqdm
 import typer
 import subprocess
-import cuml.manifold.umap as umap
+import umap
 
 MIN_SENTENCES = 20
 
