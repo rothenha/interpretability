@@ -39,8 +39,8 @@ import cuml.manifold.umap as umap
 
 MIN_SENTENCES = 20
 
-class SentenceData(object):
 
+class SentenceData(object):
     def __init__(self, lstWords, lstPOSs):
         self.lstWords = lstWords
         self.lstPOSs = lstPOSs
@@ -52,6 +52,7 @@ class SentenceData(object):
         else:
             return nIndexWord
 
+
 class VRTSentenceProvider:
     id_map = {}
 
@@ -62,49 +63,62 @@ class VRTSentenceProvider:
         self.lstSentenceData = self.process_corpus()
         typer.secho(f"shuffling corpus sentences", fg=typer.colors.MAGENTA, err=True)
         np.random.shuffle(self.lstSentenceData)
-        self.mapWordSentenceIndices = self.indexSentences(set(lstVocab), self.lstSentenceData)
+        self.mapWordSentenceIndices = self.indexSentences(
+            set(lstVocab), self.lstSentenceData
+        )
         # typer.secho(f"index: {self.mapWordSentenceIndices}", fg=typer.colors.MAGENTA)
 
     def indexSentences(self, setVocab, lstSentenceData: List[SentenceData]):
-        typer.secho(f"indexing corpus for the defined vocabulary", fg=typer.colors.MAGENTA, err=True)
+        typer.secho(
+            f"indexing corpus for the defined vocabulary",
+            fg=typer.colors.MAGENTA,
+            err=True,
+        )
         mapWordSentenceIndices = {}
         for nSentenceIndex, sentenceData in enumerate(lstSentenceData):
             setWordsSeenInSentence = set()
             for nWordIndex, strWord in enumerate(sentenceData.lstWords):
                 if strWord in setVocab:
                     if strWord not in mapWordSentenceIndices:
-                        mapWordSentenceIndices[strWord] = [ (nSentenceIndex, sentenceData.lstPOSs[nWordIndex]) ]
+                        mapWordSentenceIndices[strWord] = [
+                            (nSentenceIndex, sentenceData.lstPOSs[nWordIndex])
+                        ]
                     else:
                         # only add first occurrence of a word
                         if strWord not in setWordsSeenInSentence:
-                            mapWordSentenceIndices[strWord].append( (nSentenceIndex, sentenceData.lstPOSs[nWordIndex]) )
+                            mapWordSentenceIndices[strWord].append(
+                                (nSentenceIndex, sentenceData.lstPOSs[nWordIndex])
+                            )
 
         return mapWordSentenceIndices
-    
+
     def getSentenceDataForWord(self, strWord: str, nMaxCount: int = -1):
         if strWord not in self.mapWordSentenceIndices:
             return None
-        
+
         lstSentenceIndexAndPOS = self.mapWordSentenceIndices[strWord]
 
         lstSentencesWithPOS = []
         for nSentenceIndex, strPOS in lstSentenceIndexAndPOS:
-            lstSentencesWithPOS.append( {
-                "sentence": " ".join(self.lstSentenceData[nSentenceIndex].lstWords),
-                "pos": strPOS} )
+            lstSentencesWithPOS.append(
+                {
+                    "sentence": " ".join(self.lstSentenceData[nSentenceIndex].lstWords),
+                    "pos": strPOS,
+                }
+            )
             if nMaxCount > 0 and len(lstSentencesWithPOS) == nMaxCount:
                 break
 
         return lstSentencesWithPOS
 
     def isTagLine(self, strLine):
-        return re.match(r'^</?(\S+).*>$', strLine)				
-   
+        return re.match(r"^</?(\S+).*>$", strLine)
+
     def process_corpus(self):
         self.id_map = {}
         lstSentenceData = []
-        strSentenceStartPattern = r'^<{}( .*)?>$'.format(self.strSentenceTag)
-        strSentenceEndPattern = r'^</{}>$'.format(self.strSentenceTag)
+        strSentenceStartPattern = r"^<{}( .*)?>$".format(self.strSentenceTag)
+        strSentenceEndPattern = r"^</{}>$".format(self.strSentenceTag)
 
         isInSentence = False
         lstTokens = []
@@ -135,6 +149,7 @@ class VRTSentenceProvider:
                     lstPOSs.append(strPOS)
 
         return lstSentenceData
+
 
 def neighbors(word, lstSentenceData, tokenizer, model, device):
     """Get the info and (umap-projected) embeddings about a word."""
@@ -263,7 +278,6 @@ def get_vocab_from_cwb(
 
 
 def main(
-    
     f_corpus: Optional[typer.FileText] = typer.Argument(
         None,
         help="decoded CWB corpus file (read from stdin if not given)",
