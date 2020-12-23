@@ -16,8 +16,9 @@
  */
 
 export const commonWords: string[] = [
-  ' ',    'the',  'be',   'to', 'of',   'and',  'a',    'an',  'in',
-  'that', 'have', 'I',    'it', 'for',  'on',   'with', 'he',  'as',
-  'you',  'do',   'at',   'is', 'was',  'are',  'its',  'has', 'were',
-  'will', 'or',   'this', 'by', 'from', 'does', 'can'
+  'und', 'der', 'die', 'das', 'ist', 'sind', 'bin', 'ein', 'eine', 'eines',
+  'einen', 'einem', 'einer', 'oder', 'den', 'auch', 'auf', 'es', 'er',
+  'um', 'sein', 'seiner', 'seines', 'seinen', 'seinem',
+  'haben', 'hat', 'hatte', 'quot', 'welcher', 'welche', 'welches', 'welchen', 'welchem',
+  'dies', 'diese', 'dieses', 'quot', ' '
 ];

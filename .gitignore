@@ -1,3 +1,7 @@
 context-atlas/archive.zip
 context-atlas/enwiki_2017_08_20_trimmed.dict
 context-atlas/package-lock.json
+context-atlas/pos_leg.ts
+context-atlas/pos_party.ts
+context-atlas/party_name_values.txt
+context-atlas/legislature_values.txt
