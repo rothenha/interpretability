@@ -24,7 +24,7 @@ import {POS, POSTag, SimplePOS} from './pos';
 export function letterColor(word: string) {
   const alphabet = [
     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ä', 'ö', 'ü', 'ß'
   ];
   const posIdx = alphabet.indexOf(word[0]);
   const percentageOffset = .9;
@@ -51,7 +51,7 @@ export function fullPOSToSimplePOS(pos: string) {
  */
 export function labelToWordsSet(
     label: string, word: string, removeSingleWords = true) {
-  const labelStripped = label.replace(/[^\w\s]|_/g, '').replace(/\s+/g, ' ');
+  const labelStripped = label.replace(/[^\wäöüß\s]|_/g, '').replace(/\s+/g, ' ');
   let words = labelStripped.split(' ');
 
   // Also add compounds that are the previous word + the query word (and next).
