@@ -56,10 +56,11 @@ class SentenceData(object):
 class VRTSentenceProvider:
     id_map = {}
 
-    def __init__(self, f_Corpus, strSentenceTag, nMaxSentenceLength, lstVocab):
+    def __init__(self, f_Corpus, strSentenceTag, nMinSentenceLength, nMaxSentenceLength, lstVocab):
         self.f_corpus = f_Corpus
         self.strSentenceTag = strSentenceTag
         self.nMaxSentenceLength = nMaxSentenceLength
+        self.nMinSentenceLength = nMinSentenceLength
         self.lstSentenceData = self.process_corpus()
         typer.secho(f"shuffling corpus sentences", fg=typer.colors.MAGENTA, err=True)
         np.random.shuffle(self.lstSentenceData)
@@ -140,7 +141,8 @@ class VRTSentenceProvider:
                     if re.match(strSentenceEndPattern, strLine):
                         isInSentence = False
 
-                        if len(lstTokens) <= self.nMaxSentenceLength:
+                        nTokensInSentence = len(lstTokens)
+                        if nTokensInSentence >= self.nMinSentenceLength and nTokensInSentence <= self.nMaxSentenceLength:
                             lstSentenceData.append(SentenceData(lstTokens, lstPOSs))
                 else:
                     # typer.secho(f"strLine: {strLine}", fg=typer.colors.MAGENTA)
@@ -334,7 +336,7 @@ def main(
     with open("static/words.json", "w") as f_words:
         json.dump(lstWords, f_words)
 
-    vrtSentenceProvider = VRTSentenceProvider(f_corpus, "s", 40, lstWords)
+    vrtSentenceProvider = VRTSentenceProvider(f_corpus, "s", 10, 100, lstWords)
 
     for strWord in tqdm(lstWords):
         lstSentenceData = vrtSentenceProvider.getSentenceDataForWord(

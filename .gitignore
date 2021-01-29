@@ -5,3 +5,4 @@ context-atlas/pos_leg.ts
 context-atlas/pos_party.ts
 context-atlas/party_name_values.txt
 context-atlas/legislature_values.txt
+context-atlas/colorSchemesParties.ts
