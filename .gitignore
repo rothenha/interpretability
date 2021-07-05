@@ -1,3 +1,7 @@
 context-atlas/archive.zip
 context-atlas/enwiki_2017_08_20_trimmed.dict
 context-atlas/package-lock.json
+context-atlas/models
+context-atlas/data
+context-atlas/static_bak
+context-atlas/__pycache__/acqdiv_reader.cpython-38.pyc

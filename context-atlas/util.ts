@@ -19,7 +19,7 @@ import * as d3 from 'd3';
 
 import {commonWords} from './commonWords';
 import {Label, Point, SentData} from './index';
-import {POS, POSTag, SimplePOS} from './pos';
+import {POS, POSTag, SimplePOS} from './pos_chintang';
 
 export function letterColor(word: string) {
   const alphabet = [
@@ -179,7 +179,7 @@ export function centerFrame(
   const centerx = d3.scaleLinear().range([margin + offset, width - margin * 5]);
   const centery = d3.scaleLinear().range([margin, height - margin]);
 
-  for (let layer = 0; layer < 12; layer++) {
+  for (let layer = 0; layer < 6; layer++) {
     const dataLayer = data[layer];
     const transposedEmb = transpose(dataLayer);
     const xs = transposedEmb[0];

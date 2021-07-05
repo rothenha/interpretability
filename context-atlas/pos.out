@@ -1,0 +1,176 @@
+
+            export interface POSTag {
+                tag: string;
+                description: string;
+                dispPos?: string;
+            }
+
+            export const POS: POSTag[] =
+            [
+    {
+        "tag": "adj",
+        "description": "adj",
+        "dispPos": "adj"
+    },
+    {
+        "tag": "interj",
+        "description": "interj",
+        "dispPos": "interj"
+    },
+    {
+        "tag": "pro",
+        "description": "pro",
+        "dispPos": "pro"
+    },
+    {
+        "tag": "none",
+        "description": "none",
+        "dispPos": "none"
+    },
+    {
+        "tag": "vi",
+        "description": "vi",
+        "dispPos": "vi"
+    },
+    {
+        "tag": "rgm",
+        "description": "rgm",
+        "dispPos": "rgm"
+    },
+    {
+        "tag": "num",
+        "description": "num",
+        "dispPos": "num"
+    },
+    {
+        "tag": "gm",
+        "description": "gm",
+        "dispPos": "gm"
+    },
+    {
+        "tag": "adv",
+        "description": "adv",
+        "dispPos": "adv"
+    },
+    {
+        "tag": "n",
+        "description": "n",
+        "dispPos": "n"
+    },
+    {
+        "tag": "predadj",
+        "description": "predadj",
+        "dispPos": "predadj"
+    },
+    {
+        "tag": "vt",
+        "description": "vt",
+        "dispPos": "vt"
+    },
+    {
+        "tag": "sound",
+        "description": "sound",
+        "dispPos": "sound"
+    },
+    {
+        "tag": "v",
+        "description": "v",
+        "dispPos": "v"
+    },
+    {
+        "tag": "\u0320-gm",
+        "description": "\u0320-gm",
+        "dispPos": "\u0320-gm"
+    },
+    {
+        "tag": "noun",
+        "description": "noun",
+        "dispPos": "noun"
+    },
+    {
+        "tag": "v2",
+        "description": "v2",
+        "dispPos": "v2"
+    },
+    {
+        "tag": "***",
+        "description": "***",
+        "dispPos": "***"
+    }
+]
+
+            export const SimplePOS: POSTag[] =
+            [
+    {
+        "tag": "adj",
+        "description": "adj"
+    },
+    {
+        "tag": "interj",
+        "description": "interj"
+    },
+    {
+        "tag": "pro",
+        "description": "pro"
+    },
+    {
+        "tag": "none",
+        "description": "none"
+    },
+    {
+        "tag": "vi",
+        "description": "vi"
+    },
+    {
+        "tag": "rgm",
+        "description": "rgm"
+    },
+    {
+        "tag": "num",
+        "description": "num"
+    },
+    {
+        "tag": "gm",
+        "description": "gm"
+    },
+    {
+        "tag": "adv",
+        "description": "adv"
+    },
+    {
+        "tag": "n",
+        "description": "n"
+    },
+    {
+        "tag": "predadj",
+        "description": "predadj"
+    },
+    {
+        "tag": "vt",
+        "description": "vt"
+    },
+    {
+        "tag": "sound",
+        "description": "sound"
+    },
+    {
+        "tag": "v",
+        "description": "v"
+    },
+    {
+        "tag": "\u0320-gm",
+        "description": "\u0320-gm"
+    },
+    {
+        "tag": "noun",
+        "description": "noun"
+    },
+    {
+        "tag": "v2",
+        "description": "v2"
+    },
+    {
+        "tag": "***",
+        "description": "***"
+    }
+]

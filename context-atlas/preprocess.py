@@ -22,7 +22,11 @@ from __future__ import print_function
 
 import os
 import torch
-from pytorch_pretrained_bert import BertTokenizer, BertModel, BertForMaskedLM
+from pytorch_transformers.modeling_bert import BertConfig
+from pytorch_transformers.modeling_utils import PreTrainedModel
+import torch
+from pytorch_transformers import BertTokenizer, BertModel, BertForMaskedLM
+# from pytorch_pretrained_bert import BertTokenizer, BertModel, BertForMaskedLM
 import sqlite3 as sql
 import re
 import numpy as np
@@ -66,7 +70,6 @@ def get_embeddings(word, sentences):
   for sentence in sentences:
     sentence = '[CLS] ' + sentence + ' [SEP]'
     tokenized_text = tokenizer.tokenize(sentence)
-
     # Convert token to vocabulary indices
     indexed_tokens = tokenizer.convert_tokens_to_ids(tokenized_text)
 
@@ -86,11 +89,13 @@ def get_embeddings(word, sentences):
 
     # Predict hidden states features for each layer
     with torch.no_grad():
-      encoded_layers, _ = model(tokens_tensor, segments_tensors)
+      outputs = model(tokens_tensor, token_type_ids=segments_tensors)
+      encoded_layers = outputs[2]
       encoded_layers = [l.cpu() for l in encoded_layers]
 
     # We have a hidden states for each of the 12 layers in model bert-base-uncased
     encoded_layers = [l.numpy() for l in encoded_layers]
+    word_idx = -1
     try:
       word_idx = tokenized_text.index(word)
     # If the word is made up of multiple tokens, just use the first one of the tokens that make it up.
@@ -133,7 +138,7 @@ def get_sentences():
   """Returns a bunch of sentences from wikipedia"""
   print('Selecting sentences from wikipedia...')
 
-  select = 'select * from articles limit 5000000'
+  select = 'select * from articles limit 50000'
   docs, _ = get_query(select)
   docs = [doc[3] for doc in docs]
   doc = ' '.join(docs)
@@ -171,9 +176,10 @@ if __name__ == '__main__':
   print("device : ", device)
 
   # Load pre-trained model tokenizer (vocabulary)
+  config = BertConfig.from_pretrained("bert-base-uncased", output_hidden_states=True)
   tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
   # Load pre-trained model (weights)
-  model = BertModel.from_pretrained('bert-base-uncased')
+  model = BertModel.from_pretrained('bert-base-uncased', config=config)
   model.eval()
   model = model.to(device)
 

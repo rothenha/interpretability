@@ -21,7 +21,7 @@ import * as jp from 'd3-jetpack';
 
 import {ColorSchemeBright, ColorSchemeDeep} from './colorSchemes';
 import {WordSelectorDropdown} from './dropdown';
-import {POSTag, SimplePOS} from './pos';
+import {POSTag, SimplePOS} from './pos_chintang';
 import * as util from './util';
 
 declare var math: any;
@@ -94,7 +94,7 @@ export class BertVis {
     this.addHandlers();
     await this.loadWords();
     const urlWord = util.getURLWord();
-    this.getData(urlWord ? urlWord : 'sagen');
+    this.getData(urlWord ? urlWord : 'kha');
     util.polyfillCheckIntersection();
   }
 
@@ -600,7 +600,7 @@ export class BertVis {
     this.data = null;
 
     // Reset the current layer and zoom transform.
-    this.currLayer = 11;
+    this.currLayer = 5;
     (this.layerDropdown.node() as HTMLInputElement).value =
         this.currLayer.toString();
     this.resetTransform();
